@@ -13,13 +13,13 @@ import re
     # extract from metadata .txt files: airlines and CANCELLATION_CODE
 
     @staticmethod
-    def create_airline_table(path1,path2):
+    def create_aircraft_table(path1,path2):
         """
-        Function: Generate and create airlines table code
+        Function: Generate and create aircraft table code
         param: 
             - path1: txt file
             - path2: dataset file
-        output: airline df
+        output: aircraft df
         """
         df = spark.read.csv(path2, header=True)
         df2 = df.select("MKT_UNIQUE_CARRIER","TAIL_NUM").dropDuplicates()
@@ -33,11 +33,32 @@ import re
             splitted_airline = [c.split(":") for c in airline]
             c_airline = [x[0].replace("'","").strip() for x in splitted_airline]
             airline_name = [x[1].replace("'","").strip() for x in splitted_airline]
-            airline_df = spark.createDataFrame(zip(c_airline, airline_name), schema=['c_airline', 'airline_name'])
-        return airline_df.join(df2,airline_df.c_airline == df2.MKT_UNIQUE_CARRIER,"inner")\
+            aircraft_df = spark.createDataFrame(zip(c_airline, airline_name), schema=['c_airline', 'airline_name'])
+            aircraft_df=aircraft_df.join(df2,aircraft_df.c_airline == df2.MKT_UNIQUE_CARRIER,"inner")\
                         .drop("MKT_UNIQUE_CARRIER").dropDuplicates()
+            return aircraft_df.select("C_aircraft","C_airline")
 
-
+    @staticmethod
+    def create_airline_table(path):
+        """
+        Function: Generate and create airline table code
+        param: 
+            - path: txt file
+        output: airline df
+        """
+        with open(path1) as f:
+            content = f.readlines()
+            content = [x.strip() for x in content]
+            #strip(): removes any leading (spaces at the beginning) and trailing (spaces at the end)
+            #characters (space is the default leading character to remove)
+            
+            airline = content[10:20]
+            splitted_airline = [c.split(":") for c in airline]
+            c_airline = [x[0].replace("'","").strip() for x in splitted_airline]
+            airline_name = [x[1].replace("'","").strip() for x in splitted_airline]
+            airline_df = spark.createDataFrame(zip(c_airline, airline_name), schema=['c_airline', 'airline_name'])
+            return airline_df
+        
     @staticmethod
     def create_cancelation_table(path):
         """
@@ -53,8 +74,10 @@ import re
             splitted_cancel = [c.split(":") for c in cancel]
             c_cancel = [x[0].replace("'","").strip() for x in splitted_cancel]
             cancel_des= [x[1].replace("'","").strip() for x in splitted_cancel]
-            cancel_df = pd.DataFrame({"c_cancel" : c_cancel, "cancel_des": cancel_des})
-            return cancel_df.to_csv("data/airline.csv")
+            c_cancel.append("O")
+            cancel_des.append("No cancelation")
+            cancel_df = pd.DataFrame({"c_cancel" : c_cancel, "cancel_des": cancel_des},index = False)
+            return cancel_df.to_csv("data/cancel.csv")
 
     @staticmethod
     def create_port_loc_table(path):
