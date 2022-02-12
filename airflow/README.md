@@ -3,7 +3,7 @@
 ## I. SETTING UP AIRFLOW ON DOCKER
 1. Fetch the `docker-compose.yml` file:
  
- `curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.0.1/docker-compose.yaml'``
+ `curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.0.1/docker-compose.yaml'`
 
 Metainfo:
 - `airflow-schedule`: The scheduler monitors all tasks and DAGs, then triggers the task instances once their dependencies are complete.
